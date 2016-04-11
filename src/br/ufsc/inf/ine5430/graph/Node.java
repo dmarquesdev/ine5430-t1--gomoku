@@ -1,14 +1,13 @@
 package br.ufsc.inf.ine5430.graph;
 
 import java.util.HashSet;
-import java.util.Set;
 
 public class Node {
 	private int id;
 	private String label;
-	private Set<Edge> edges;
+	private HashSet<Edge> edges;
 
-	public Node(int id, String label, Set<Edge> edges) {
+	public Node(int id, String label, HashSet<Edge> edges) {
 		super();
 		this.id = id;
 		this.label = label;
@@ -41,12 +40,16 @@ public class Node {
 		this.label = label;
 	}
 
-	public Set<Edge> getEdges() {
+	public HashSet<Edge> getEdges() {
 		return edges;
 	}
 
-	public void setEdges(Set<Edge> edges) {
+	public void setEdges(HashSet<Edge> edges) {
 		this.edges = edges;
+	}
+	
+	public void addEdge(Edge edge) {
+		edges.add(edge);
 	}
 
 	@Override

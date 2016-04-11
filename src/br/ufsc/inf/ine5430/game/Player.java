@@ -1,17 +1,15 @@
 package br.ufsc.inf.ine5430.game;
 
-import br.ufsc.inf.ine5430.game.Piece.Color;
-
 public class Player {
 	private int id;
 	private String name;
-	private Color color;
-	
-	public Player(int id, String name, Color color) {
+	private Piece pieceType;
+
+	public Player(int id, String name, Piece pieceType) {
 		super();
 		this.id = id;
 		this.name = name;
-		this.color = color;
+		this.pieceType = pieceType;
 	}
 
 	public int getId() {
@@ -22,14 +20,6 @@ public class Player {
 		this.id = id;
 	}
 
-	public Color getColor() {
-		return color;
-	}
-
-	public void setColor(Color color) {
-		this.color = color;
-	}
-
 	public String getName() {
 		return name;
 	}
@@ -38,13 +28,21 @@ public class Player {
 		this.name = name;
 	}
 
+	public Piece getPieceType() {
+		return pieceType;
+	}
+
+	public void setPieceType(Piece pieceType) {
+		this.pieceType = pieceType;
+	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((color == null) ? 0 : color.hashCode());
 		result = prime * result + id;
 		result = prime * result + ((name == null) ? 0 : name.hashCode());
+		result = prime * result + ((pieceType == null) ? 0 : pieceType.hashCode());
 		return result;
 	}
 
@@ -57,8 +55,6 @@ public class Player {
 		if (getClass() != obj.getClass())
 			return false;
 		Player other = (Player) obj;
-		if (color != other.color)
-			return false;
 		if (id != other.id)
 			return false;
 		if (name == null) {
@@ -66,6 +62,9 @@ public class Player {
 				return false;
 		} else if (!name.equals(other.name))
 			return false;
+		if (pieceType != other.pieceType)
+			return false;
 		return true;
 	}
+
 }

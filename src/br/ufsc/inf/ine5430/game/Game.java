@@ -2,16 +2,16 @@ package br.ufsc.inf.ine5430.game;
 
 import java.util.HashSet;
 
-import br.ufsc.inf.ine5430.graph.Graph;
+import br.ufsc.inf.ine5430.graph.GraphImpl;
+import br.ufsc.inf.ine5430.graph.Node;
 
-public class Game implements Graph {
+public class Game extends GraphImpl {
 	private Player player1;
 	private Player player2;
 	private int turn;
 
 	private GameState currentState;
 	private HashSet<GameState> possibleStates;
-	private HashSet<GameState> previousStates;
 
 	public Game(Player player1, Player player2) {
 		super();
@@ -21,7 +21,6 @@ public class Game implements Graph {
 
 		currentState = new GameState(turn, "Clear Board", null, new Piece[15][15], player1);
 		possibleStates = new HashSet<>();
-		previousStates = new HashSet<>();
 	}
 
 	public Player getPlayer1() {
@@ -63,13 +62,20 @@ public class Game implements Graph {
 	public void setPossibleStates(HashSet<GameState> possibleStates) {
 		this.possibleStates = possibleStates;
 	}
-
-	public HashSet<GameState> getPreviousStates() {
-		return previousStates;
+	
+	public void makeAPlay(Play play) {
+		//TODO implement
 	}
-
-	public void setPreviousStates(HashSet<GameState> previousStates) {
-		this.previousStates = previousStates;
+	
+	public boolean isAWin(GameState state) {
+		//TODO implement
+		return false;
+	}
+	
+	@Override
+	public boolean isLeafNode(Node node) {
+		// TODO calculate next nodes
+		return super.isLeafNode(node);
 	}
 
 }

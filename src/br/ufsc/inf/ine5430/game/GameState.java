@@ -1,7 +1,6 @@
 package br.ufsc.inf.ine5430.game;
 
-import java.util.Arrays;
-import java.util.Set;
+import java.util.HashSet;
 
 import br.ufsc.inf.ine5430.graph.Edge;
 import br.ufsc.inf.ine5430.graph.Node;
@@ -9,8 +8,11 @@ import br.ufsc.inf.ine5430.graph.Node;
 public class GameState extends Node {
 	private Piece[][] board;
 	private Player player;
+	private Integer value;
+	private int alfa;
+	private int beta;
 
-	public GameState(int id, String label, Set<Edge> edges, Piece[][] board, Player player) {
+	public GameState(int id, String label, HashSet<Edge> edges, Piece[][] board, Player player) {
 		super(id, label, edges);
 		this.board = board;
 		this.player = player;
@@ -32,32 +34,28 @@ public class GameState extends Node {
 		this.player = player;
 	}
 
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = super.hashCode();
-		result = prime * result + Arrays.deepHashCode(board);
-		result = prime * result + ((player == null) ? 0 : player.hashCode());
-		return result;
+	public int getValue() {
+		if(value == null) {
+			//TODO choose between heuristics and utility and calculate
+			value = 0;
+		}
+		return value;
 	}
 
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (!super.equals(obj))
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		GameState other = (GameState) obj;
-		if (!Arrays.deepEquals(board, other.board))
-			return false;
-		if (player == null) {
-			if (other.player != null)
-				return false;
-		} else if (!player.equals(other.player))
-			return false;
-		return true;
+	public int getAlfa() {
+		return alfa;
+	}
+
+	public void setAlfa(int alfa) {
+		this.alfa = alfa;
+	}
+
+	public int getBeta() {
+		return beta;
+	}
+
+	public void setBeta(int beta) {
+		this.beta = beta;
 	}
 
 }
