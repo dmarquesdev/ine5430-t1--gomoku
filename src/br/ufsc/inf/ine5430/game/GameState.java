@@ -12,8 +12,8 @@ public class GameState extends Node {
 	private int alfa;
 	private int beta;
 
-	public GameState(int id, String label, HashSet<Edge> edges, Piece[][] board, Player player) {
-		super(id, label, edges);
+	public GameState(int id, String label, HashSet<Edge> edges, GameState previous, Piece[][] board, Player player) {
+		super(id, label, previous, edges);
 		this.board = board;
 		this.player = player;
 	}
@@ -35,8 +35,8 @@ public class GameState extends Node {
 	}
 
 	public int getValue() {
-		if(value == null) {
-			//TODO choose between heuristics and utility and calculate
+		if (value == null) {
+			// TODO choose between heuristics and utility and calculate
 			value = 0;
 		}
 		return value;

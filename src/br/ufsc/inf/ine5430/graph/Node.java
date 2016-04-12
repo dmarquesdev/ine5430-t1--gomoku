@@ -6,11 +6,13 @@ public class Node {
 	private int id;
 	private String label;
 	private HashSet<Edge> edges;
+	private Node parent;
 
-	public Node(int id, String label, HashSet<Edge> edges) {
+	public Node(int id, String label, Node parent, HashSet<Edge> edges) {
 		super();
 		this.id = id;
 		this.label = label;
+		this.parent = parent;
 		if (edges != null && !edges.isEmpty())
 			this.edges = edges;
 		else
@@ -21,6 +23,14 @@ public class Node {
 		super();
 		this.id = id;
 		this.label = label;
+		this.edges = new HashSet<>();
+	}
+
+	public Node(int id, String label, Node parent) {
+		super();
+		this.id = id;
+		this.label = label;
+		this.parent = parent;
 		this.edges = new HashSet<>();
 	}
 
@@ -47,7 +57,15 @@ public class Node {
 	public void setEdges(HashSet<Edge> edges) {
 		this.edges = edges;
 	}
-	
+
+	public Node getParent() {
+		return parent;
+	}
+
+	public void setParent(Node parent) {
+		this.parent = parent;
+	}
+
 	public void addEdge(Edge edge) {
 		edges.add(edge);
 	}
@@ -59,6 +77,7 @@ public class Node {
 		result = prime * result + ((edges == null) ? 0 : edges.hashCode());
 		result = prime * result + id;
 		result = prime * result + ((label == null) ? 0 : label.hashCode());
+		result = prime * result + ((parent == null) ? 0 : parent.hashCode());
 		return result;
 	}
 
@@ -83,6 +102,12 @@ public class Node {
 				return false;
 		} else if (!label.equals(other.label))
 			return false;
+		if (parent == null) {
+			if (other.parent != null)
+				return false;
+		} else if (!parent.equals(other.parent))
+			return false;
 		return true;
 	}
+
 }
