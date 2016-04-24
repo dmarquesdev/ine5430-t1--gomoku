@@ -1,7 +1,5 @@
 package br.ufsc.inf.ine5430.game;
 
-import java.util.HashSet;
-
 import br.ufsc.inf.ine5430.graph.GraphImpl;
 import br.ufsc.inf.ine5430.graph.Node;
 
@@ -9,9 +7,13 @@ public class Game extends GraphImpl {
 	private Player player1;
 	private Player player2;
 	private int turn;
+	private Play lastPlay;
 
 	private GameState currentState;
-	private HashSet<GameState> possibleStates;
+	
+	public static final int NONE = 0;
+	public static final int BLACK = 1;
+	public static final int WHITE = 2;
 
 	public Game(Player player1, Player player2) {
 		super();
@@ -19,8 +21,8 @@ public class Game extends GraphImpl {
 		this.player2 = player2;
 		turn = 1;
 
-		currentState = new GameState(turn, "Clear Board", null, null, new Piece[15][15], player1);
-		possibleStates = new HashSet<>();
+		currentState = new GameState("Empty Board", null, null, new int[15][15], player1);
+		addNode(currentState);
 	}
 
 	enum TransposeFrom {
@@ -69,27 +71,45 @@ public class Game extends GraphImpl {
 		this.currentState = currentState;
 	}
 
-	public HashSet<GameState> getPossibleStates() {
-		return possibleStates;
+	public synchronized void makeAPlay(Play play) {
+		// Get current state board clone
+		int[][] board = currentState.cloneBoard();
+		// Add the new piece into the board
+		board[play.getX()][play.getY()] = play.getPlayer().getPieceType();
+
+		// Create a new game state with the new board
+		GameState newState = new GameState("Turn " + turn, null, currentState, board, play.getPlayer());
+
+		// Add the new state (node) to the game (graph)
+		addNode(newState);
+
+		// Change the current state to the new one
+		currentState = newState;
+
+		// Increment the turn counter
+		turn++;
+
+		// Change the last play holder
+		lastPlay = play;
 	}
 
-	public void setPossibleStates(HashSet<GameState> possibleStates) {
-		this.possibleStates = possibleStates;
-	}
-
-	public void makeAPlay(Play play) {
-		// TODO implement
+	public Player isAWin() {
+		if (isAWin(currentState, lastPlay)) {
+			return lastPlay.getPlayer();
+		} else {
+			return null;
+		}
 	}
 
 	public boolean isAWin(GameState state, Play play) {
-		return verticalCheckWin(state.getBoard(), play) || horizontalCheckWin(state.getBoard(), play)
-				|| diagonalsCheckWin(state.getBoard(), play);
+		return (play != null && state != null) && (verticalCheckWin(state.getBoard(), play)
+				|| horizontalCheckWin(state.getBoard(), play) || diagonalsCheckWin(state.getBoard(), play));
 	}
 
-	private boolean horizontalCheckWin(Piece[][] board, Play play) {
+	private boolean horizontalCheckWin(int[][] board, Play play) {
 		// Transpose the board (exchange rows and columns) and test for Vertical
 		// Win
-		Piece[][] transposedBoard = new Piece[board.length][board[0].length];
+		int[][] transposedBoard = new int[board.length][board[0].length];
 
 		for (int i = 0; i < board.length; i++) {
 			for (int j = 0; j < board[0].length; j++) {
@@ -101,24 +121,37 @@ public class Game extends GraphImpl {
 		return verticalCheckWin(transposedBoard, transposedPlay);
 	}
 
-	private boolean diagonalsCheckWin(Piece[][] board, Play play) {
+	private boolean diagonalsCheckWin(int[][] board, Play play) {
 		boolean win = false;
 
 		// Align the board and test for Vertical Win
-		Piece[][] alignedBoard = board.clone();
-		
-		int shift = 4;
-		for (int i = Math.max(0, play.getX() - 4); i < play.getX(); i++) {
-			alignedBoard[i][play.getY()] = alignedBoard[i][play.getY() - shift];
+		int[][] alignedBoard = GameState.cloneBoard(board);
+
+		// Limits
+		int x = play.getX(), y = play.getY();
+		// Top-Left
+		int limitTL = Math.min(x, y);
+		// Top-Right
+		int limitTR = Math.min(x, 14 - y);
+		// Bottom-Left
+		int limitBL = Math.min(14 - x, y);
+		// Bottom-Right
+		int limitBR = Math.min(14 - x, 14 - y);
+
+		// Top-Left
+		int shift = Math.min(4, limitTL);
+		for (int i = x-shift; i < x; i++) {
+			alignedBoard[i][y] = alignedBoard[i][y - shift];
 			shift--;
 		}
-		
-		shift = 4;
-		for (int i = Math.max(15, play.getX() + 4); i > play.getX(); i--) {
-			alignedBoard[i][play.getY()] = alignedBoard[i][play.getY() + shift];
+
+		// Bottom-Right
+		shift = Math.min(4, limitBR);
+		for (int i = x+shift; i > x; i--) {
+			alignedBoard[i][y] = alignedBoard[i][y + shift];
 			shift--;
 		}
-		
+
 		win = verticalCheckWin(alignedBoard, play);
 
 		if (win) {
@@ -126,20 +159,22 @@ public class Game extends GraphImpl {
 		}
 
 		// Align the board and test for Vertical Win
-		alignedBoard = board.clone();
-		
-		shift = 4;
-		for (int i = Math.max(0, play.getX() - 4); i < play.getX(); i++) {
-			alignedBoard[i][play.getY()] = alignedBoard[i][play.getY() + shift];
+		alignedBoard = GameState.cloneBoard(board);
+
+		// Top-Right
+		shift = Math.min(4, limitTR);
+		for (int i = x-shift; i < x; i++) {
+			alignedBoard[i][y] = alignedBoard[i][y + shift];
 			shift--;
 		}
-		
-		shift = 4;
-		for (int i = Math.max(15, play.getX() + 4); i > play.getX(); i--) {
-			alignedBoard[i][play.getY()] = alignedBoard[i][play.getY() - shift];
+
+		// Bottom-Left
+		shift = Math.min(4, limitBL);
+		for (int i = x+shift; i > x; i--) {
+			alignedBoard[i][y] = alignedBoard[i][y - shift];
 			shift--;
 		}
-		
+
 		win = verticalCheckWin(alignedBoard, play);
 
 		if (win) {
@@ -149,11 +184,14 @@ public class Game extends GraphImpl {
 		return false;
 	}
 
-	private boolean verticalCheckWin(Piece[][] board, Play play) {
+	private boolean verticalCheckWin(int[][] board, Play play) {
 		int pieceCount = 1;
+
+		int x = play.getX();
+
 		// Vertical check
 		// ==== Check 5 places bottom for consecutive pieces
-		for (int i = play.getX() + 1; i < play.getX() + 5; i++) {
+		for (int i = Math.min(x + 1, 14); i <= Math.min(x + 5, 14); i++) {
 			if (board[i][play.getY()] == play.getPlayer().getPieceType()) {
 				pieceCount++;
 			} else {
@@ -167,7 +205,9 @@ public class Game extends GraphImpl {
 
 		// ==== Check 5 places top
 		// ==== (consider the number of consecutive pieces to the bottom)
-		for (int i = play.getX() - 1; i < play.getX() - 5 + pieceCount; i--) {
+		int consecutives = pieceCount;
+
+		for (int i = Math.max(x - 1, 0); i >= Math.max(x - 5 + consecutives, 0); i--) {
 			if (board[i][play.getY()] == play.getPlayer().getPieceType()) {
 				pieceCount++;
 			} else {
@@ -186,6 +226,19 @@ public class Game extends GraphImpl {
 	public boolean isLeafNode(Node node) {
 		// TODO calculate next nodes
 		return super.isLeafNode(node);
+	}
+
+	public int getPiece(int row, int column) {
+		return currentState.getBoard()[row][column];
+	}
+
+	public Player getNextPlayer() {
+		return (currentState.getPlayer().equals(player1)) ? player2 : player1;
+	}
+	
+	@Override
+	public String toString() {
+		return lastPlay.toString() + "\n" + currentState.toString();
 	}
 
 }

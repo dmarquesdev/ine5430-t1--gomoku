@@ -3,9 +3,9 @@ package br.ufsc.inf.ine5430.game;
 public class Player {
 	private int id;
 	private String name;
-	private Piece pieceType;
+	private int pieceType;
 
-	public Player(int id, String name, Piece pieceType) {
+	public Player(int id, String name, int pieceType) {
 		super();
 		this.id = id;
 		this.name = name;
@@ -28,11 +28,11 @@ public class Player {
 		this.name = name;
 	}
 
-	public Piece getPieceType() {
+	public int getPieceType() {
 		return pieceType;
 	}
 
-	public void setPieceType(Piece pieceType) {
+	public void setPieceType(int pieceType) {
 		this.pieceType = pieceType;
 	}
 
@@ -42,7 +42,7 @@ public class Player {
 		int result = 1;
 		result = prime * result + id;
 		result = prime * result + ((name == null) ? 0 : name.hashCode());
-		result = prime * result + ((pieceType == null) ? 0 : pieceType.hashCode());
+		result = prime * result + pieceType;
 		return result;
 	}
 
@@ -67,4 +67,8 @@ public class Player {
 		return true;
 	}
 
+	@Override
+	public String toString() {
+		return name;
+	}
 }

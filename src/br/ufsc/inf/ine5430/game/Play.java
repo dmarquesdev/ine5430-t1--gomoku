@@ -57,4 +57,8 @@ public class Play {
 		return true;
 	}
 
+	@Override
+	public String toString() {
+		return "Player: " + player.toString() + "\nRow: " + x + "\nColumn: " + y;
+	}
 }
