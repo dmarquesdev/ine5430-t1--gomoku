@@ -1,5 +1,6 @@
 package br.ufsc.inf.ine5430.view;
 
+import br.ufsc.inf.ine5430.game.CPU;
 import br.ufsc.inf.ine5430.game.Game;
 import br.ufsc.inf.ine5430.game.Play;
 import br.ufsc.inf.ine5430.game.Player;
@@ -23,7 +24,7 @@ public class GomokuState {
 	}
 
 	public int getWinner() {
-		Player winner = game.isAWin();
+		Player winner = game.getWinner();
 		if (winner != null) {
 			return winner.getPieceType();
 		} else {
@@ -39,6 +40,11 @@ public class GomokuState {
 		Play play = new Play(currentPlayer, row, col);
 		game.makeAPlay(play);
 		currentPlayer = game.getNextPlayer();
+		
+		if(currentPlayer instanceof CPU) {
+			game.makeAPlay(((CPU) currentPlayer).createAPlay(game));
+			currentPlayer = game.getNextPlayer();
+		}
 
 		return true;
 	}

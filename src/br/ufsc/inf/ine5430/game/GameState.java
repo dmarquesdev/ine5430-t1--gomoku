@@ -9,8 +9,6 @@ public class GameState extends Node {
 	private int[][] board;
 	private Player player;
 	private Integer value;
-	private int alfa;
-	private int beta;
 
 	public GameState(String label, HashSet<Edge> edges, GameState previous, int[][] board, Player player) {
 		super(0, label, previous, edges);
@@ -40,22 +38,6 @@ public class GameState extends Node {
 			value = 0;
 		}
 		return value;
-	}
-
-	public int getAlfa() {
-		return alfa;
-	}
-
-	public void setAlfa(int alfa) {
-		this.alfa = alfa;
-	}
-
-	public int getBeta() {
-		return beta;
-	}
-
-	public void setBeta(int beta) {
-		this.beta = beta;
 	}
 
 	public int[][] cloneBoard() {

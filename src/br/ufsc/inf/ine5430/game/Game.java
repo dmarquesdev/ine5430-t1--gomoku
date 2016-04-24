@@ -1,5 +1,7 @@
 package br.ufsc.inf.ine5430.game;
 
+import java.util.HashSet;
+
 import br.ufsc.inf.ine5430.graph.GraphImpl;
 import br.ufsc.inf.ine5430.graph.Node;
 
@@ -10,7 +12,7 @@ public class Game extends GraphImpl {
 	private Play lastPlay;
 
 	private GameState currentState;
-	
+
 	public static final int NONE = 0;
 	public static final int BLACK = 1;
 	public static final int WHITE = 2;
@@ -93,7 +95,7 @@ public class Game extends GraphImpl {
 		lastPlay = play;
 	}
 
-	public Player isAWin() {
+	public Player getWinner() {
 		if (isAWin(currentState, lastPlay)) {
 			return lastPlay.getPlayer();
 		} else {
@@ -140,14 +142,14 @@ public class Game extends GraphImpl {
 
 		// Top-Left
 		int shift = Math.min(4, limitTL);
-		for (int i = x-shift; i < x; i++) {
+		for (int i = x - shift; i < x; i++) {
 			alignedBoard[i][y] = alignedBoard[i][y - shift];
 			shift--;
 		}
 
 		// Bottom-Right
 		shift = Math.min(4, limitBR);
-		for (int i = x+shift; i > x; i--) {
+		for (int i = x + shift; i > x; i--) {
 			alignedBoard[i][y] = alignedBoard[i][y + shift];
 			shift--;
 		}
@@ -163,14 +165,14 @@ public class Game extends GraphImpl {
 
 		// Top-Right
 		shift = Math.min(4, limitTR);
-		for (int i = x-shift; i < x; i++) {
+		for (int i = x - shift; i < x; i++) {
 			alignedBoard[i][y] = alignedBoard[i][y + shift];
 			shift--;
 		}
 
 		// Bottom-Left
 		shift = Math.min(4, limitBL);
-		for (int i = x+shift; i > x; i--) {
+		for (int i = x + shift; i > x; i--) {
 			alignedBoard[i][y] = alignedBoard[i][y - shift];
 			shift--;
 		}
@@ -235,10 +237,26 @@ public class Game extends GraphImpl {
 	public Player getNextPlayer() {
 		return (currentState.getPlayer().equals(player1)) ? player2 : player1;
 	}
-	
+
 	@Override
 	public String toString() {
 		return lastPlay.toString() + "\n" + currentState.toString();
+	}
+
+	public Play getLastPlay() {
+		return lastPlay;
+	}
+
+	public void setLastPlay(Play lastPlay) {
+		this.lastPlay = lastPlay;
+	}
+
+	/** Evaluate the next moves based on the last play
+	 *	using a radius of 5 places, looking for empty places
+	 */
+	public HashSet<Play> generateMoves() {
+		HashSet<Play> plays = new HashSet<>();
+		return plays;
 	}
 
 }

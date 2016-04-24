@@ -48,7 +48,7 @@ public class GameTest {
 		play = new Play(game.getNextPlayer(), 3, 7);
 		game.makeAPlay(play);
 
-		assertEquals(game.getPlayer1(), game.isAWin());
+		assertEquals(game.getPlayer1(), game.getWinner());
 	}
 
 }
