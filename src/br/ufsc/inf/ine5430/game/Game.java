@@ -12,6 +12,8 @@ public class Game extends GraphImpl {
 	private Play lastPlay;
 
 	private GameState currentState;
+	
+	private int[] frame;
 
 	public static final int NONE = 0;
 	public static final int BLACK = 1;
@@ -25,6 +27,8 @@ public class Game extends GraphImpl {
 
 		currentState = new GameState("Empty Board", null, null, new int[15][15], player1);
 		addNode(currentState);
+		
+		frame = new int[]{5,8};
 	}
 
 	enum TransposeFrom {
@@ -73,7 +77,7 @@ public class Game extends GraphImpl {
 		this.currentState = currentState;
 	}
 
-	public synchronized void makeAPlay(Play play) {
+	public void makeAPlay(Play play) {
 		// Get current state board clone
 		int[][] board = currentState.cloneBoard();
 		// Add the new piece into the board
@@ -93,6 +97,17 @@ public class Game extends GraphImpl {
 
 		// Change the last play holder
 		lastPlay = play;
+		
+		// Change the play generation frame
+		updateFrame(play);
+	}
+
+	private void updateFrame(Play play) {
+		if(play.getX() < frame[0] || play.getY() < frame[0]) {
+			frame[0] = Math.min(play.getX(), play.getY());
+		} else if(play.getX() > frame[1] || play.getY() > frame[1]) {
+			frame[1] = Math.max(play.getX(), play.getY());
+		}
 	}
 
 	public Player getWinner() {
@@ -256,6 +271,17 @@ public class Game extends GraphImpl {
 	 */
 	public HashSet<Play> generateMoves() {
 		HashSet<Play> plays = new HashSet<>();
+		int start = frame[0], end = frame[1];
+		
+		for(int i = start; i <= end; i++) {
+			for(int j = start; j <= end; j++) {
+				if(currentState.getBoard()[i][j] == Game.NONE) {
+					Play p = new Play(getNextPlayer(), i, j);
+					plays.add(p);
+				}
+			}
+		}
+		
 		return plays;
 	}
 
