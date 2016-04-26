@@ -89,11 +89,6 @@ public class Node {
 		if (getClass() != obj.getClass())
 			return false;
 		Node other = (Node) obj;
-		if (edges == null) {
-			if (other.edges != null)
-				return false;
-		} else if (!edges.equals(other.edges))
-			return false;
 		if (id != other.id)
 			return false;
 		if (label == null) {
