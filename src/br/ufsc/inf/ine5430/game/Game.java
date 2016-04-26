@@ -24,10 +24,10 @@ public class Game extends GraphImpl {
 	public static final int WHITE = 2;
 
 	public static final int BROKEN_THREE = 10;
-	public static final int THREE = 20;
-	public static final int FOUR = 2000;
-	public static final int STRAIGHT_FOUR = 20000;
-	public static final int FIVE = 2000000;
+	public static final int THREE = 2000;
+	public static final int FOUR = 200000;
+	public static final int STRAIGHT_FOUR = 2000000;
+	public static final int FIVE = 200000000;
 
 	public Game(Player player1, Player player2) {
 		super();
@@ -113,9 +113,9 @@ public class Game extends GraphImpl {
 
 	private void updateFrame(Play play) {
 		if (play.getX() < frame[0] || play.getY() < frame[0]) {
-			frame[0] = Math.min(play.getX(), play.getY());
+			frame[0] = Math.max(0, Math.min(play.getX(), play.getY()) - 2);
 		} else if (play.getX() > frame[1] || play.getY() > frame[1]) {
-			frame[1] = Math.max(play.getX(), play.getY());
+			frame[1] = Math.min(14, Math.max(play.getX(), play.getY()) + 2);
 		}
 	}
 
@@ -264,7 +264,7 @@ public class Game extends GraphImpl {
 
 	@Override
 	public String toString() {
-		return lastPlay.toString() + "\n" + currentState.toString();
+		return lastPlay.toString() + "\nFrame: {" + frame[0] + ", " + frame[1] + "}\n" + currentState.toString();
 	}
 
 	public Play getLastPlay() {
@@ -504,6 +504,7 @@ public class Game extends GraphImpl {
 
 	private int calculateShape(int[] shape) {
 		int emptySpaces = 0, sequence = 0, enemy = 0;
+		boolean blankChars = false;
 		for (int value : shape) {
 			if (value == 1) {
 				emptySpaces++;
@@ -512,6 +513,7 @@ public class Game extends GraphImpl {
 			} else if (value == 2) {
 				sequence++;
 			} else {
+				blankChars = true;
 				break;
 			}
 		}
@@ -522,9 +524,9 @@ public class Game extends GraphImpl {
 		}
 
 		// Four
-		if (emptySpaces == 1 && enemy == 0) {
+		if (emptySpaces == 1 && enemy == 0 && !blankChars) {
 			// Straight four
-			if (shape[0] == 0 || shape[4] == 0) {
+			if (shape[0] == 1 || shape[4] == 1) {
 				return STRAIGHT_FOUR;
 			}
 			return FOUR;
