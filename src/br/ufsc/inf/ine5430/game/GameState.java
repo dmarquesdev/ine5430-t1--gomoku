@@ -8,7 +8,7 @@ import br.ufsc.inf.ine5430.graph.Node;
 public class GameState extends Node {
 	private int[][] board;
 	private Player player;
-	private Integer value;
+	private int value;
 
 	public GameState(String label, HashSet<Edge> edges, GameState previous, int[][] board, Player player) {
 		super(0, label, previous, edges);
@@ -36,7 +36,7 @@ public class GameState extends Node {
 		return value;
 	}
 
-	public void setValue(Integer value) {
+	public void setValue(int value) {
 		this.value = value;
 	}
 

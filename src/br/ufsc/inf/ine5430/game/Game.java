@@ -1,8 +1,8 @@
 package br.ufsc.inf.ine5430.game;
 
 import java.util.HashMap;
-import java.util.HashSet;
 
+import br.ufsc.inf.ine5430.game.CPU.PlayerType;
 import br.ufsc.inf.ine5430.graph.Edge;
 import br.ufsc.inf.ine5430.graph.GraphImpl;
 import br.ufsc.inf.ine5430.graph.Node;
@@ -17,17 +17,20 @@ public class Game extends GraphImpl {
 
 	private int[] frame;
 	private HashMap<int[], Integer> playedPlaces;
-	private int cpuPlayerPiece;
+	private CPU cpuPlayer;
+	private Player humanPlayer;
 
 	public static final int NONE = 0;
 	public static final int BLACK = 1;
 	public static final int WHITE = 2;
-
+	
+	public static final int TWO = 1;
 	public static final int BROKEN_THREE = 10;
-	public static final int THREE = 2000;
-	public static final int FOUR = 200000;
-	public static final int STRAIGHT_FOUR = 2000000;
-	public static final int FIVE = 200000000;
+	public static final int THREE = 1000;
+	public static final int STRAIGHT_THREE = 100000000;
+	public static final long FOUR = 1000000000000L;
+	public static final long STRAIGHT_FOUR = 1000000000000000L;
+	public static final long FIVE = 999999999999999999L;
 
 	public Game(Player player1, Player player2) {
 		super();
@@ -38,13 +41,15 @@ public class Game extends GraphImpl {
 		currentState = new GameState("Empty Board", null, null, new int[15][15], player1);
 		addNode(currentState);
 
-		frame = new int[] { 5, 8 };
+		frame = new int[] { 5, 10 };
 		playedPlaces = new HashMap<>();
 
 		if (player1 instanceof CPU) {
-			cpuPlayerPiece = player1.getPieceType();
+			cpuPlayer = (CPU) player1;
+			humanPlayer = player2;
 		} else if (player2 instanceof CPU) {
-			cpuPlayerPiece = player2.getPieceType();
+			cpuPlayer = (CPU) player2;
+			humanPlayer = player1;
 		}
 	}
 
@@ -92,8 +97,9 @@ public class Game extends GraphImpl {
 		// Add the new state (node) to the game (graph)
 		addNode(newState);
 
-		Edge edge = new Edge(NONE, newState);
+		Edge edge = new Edge(play, newState);
 		currentState.addEdge(edge);
+		addEdge(currentState, edge);
 
 		// Change the current state to the new one
 		currentState = newState;
@@ -112,7 +118,10 @@ public class Game extends GraphImpl {
 	}
 
 	private void updateFrame(Play play) {
-		if (play.getX() < frame[0] || play.getY() < frame[0]) {
+		if (turn == 2 && !(lastPlay.getPlayer() instanceof CPU)) {
+			frame[0] = Math.max(0, Math.min(play.getX(), play.getY()) - 2);
+			frame[1] = Math.min(14, Math.max(play.getX(), play.getY()) + 2);
+		} else if (play.getX() < frame[0] || play.getY() < frame[0]) {
 			frame[0] = Math.max(0, Math.min(play.getX(), play.getY()) - 2);
 		} else if (play.getX() > frame[1] || play.getY() > frame[1]) {
 			frame[1] = Math.min(14, Math.max(play.getX(), play.getY()) + 2);
@@ -279,23 +288,31 @@ public class Game extends GraphImpl {
 	 * Evaluate the next moves based on the last play using a radius of 5
 	 * places, looking for empty places
 	 */
-	public HashSet<Play> generateMoves() {
-		HashSet<Play> plays = new HashSet<>();
+	public void generateMoves(PlayerType player) {
+
 		int start = frame[0], end = frame[1];
 
 		for (int i = start; i <= end; i++) {
 			for (int j = start; j <= end; j++) {
 				if (currentState.getBoard()[i][j] == Game.NONE) {
-					Play p = new Play(getNextPlayer(), i, j);
-					plays.add(p);
+					Play p = new Play((player == PlayerType.CPU) ? cpuPlayer : humanPlayer, i, j);
+
+					if (currentState.containsEdgeWithValue(p) == null) {
+						int[][] board = currentState.cloneBoard();
+						board[i][j] = p.getPlayer().getPieceType();
+						GameState gs = new GameState("", null, currentState, board, p.getPlayer());
+						addNode(gs);
+
+						Edge edge = new Edge(p, gs);
+						currentState.addEdge(edge);
+						addEdge(currentState, edge);
+					}
 				}
 			}
 		}
-
-		return plays;
 	}
 
-	public void calculateValue(GameState state) {
+	public void calculateValue(GameState state, PlayerType player) {
 		int value = 0;
 
 		for (int[] place : playedPlaces.keySet()) {
@@ -304,13 +321,13 @@ public class Game extends GraphImpl {
 			// Limits
 			int x = place[0], y = place[1];
 			// Top
-			int limitTop = Math.max(0, x - 4);
+			int limitTop = Math.max(0, x - 5);
 			// Right
-			int limitRight = Math.min(14, y + 4);
+			int limitRight = Math.min(14, y + 5);
 			// Bottom
-			int limitBottom = Math.min(14, x + 4);
+			int limitBottom = Math.min(14, x + 5);
 			// Left
-			int limitLeft = Math.max(0, y - 4);
+			int limitLeft = Math.max(0, y - 5);
 
 			// Top-Right
 			int limitTR = Math.min(4, Math.min(limitTop, limitRight));
@@ -321,7 +338,7 @@ public class Game extends GraphImpl {
 			// Top-Left
 			int limitTL = Math.min(4, Math.min(limitTop, limitLeft));
 
-			int[] shape = new int[5];
+			int[] shape = new int[6];
 			int count = 0;
 
 			// Top
@@ -336,9 +353,9 @@ public class Game extends GraphImpl {
 				count++;
 			}
 
-			int shapeValue = calculateShape(shape);
+			long shapeValue = calculateShape(shape);
 
-			if (piece != cpuPlayerPiece) {
+			if (piece != player.getPiece()) {
 				shapeValue *= -1;
 			}
 
@@ -346,7 +363,7 @@ public class Game extends GraphImpl {
 
 			// Bottom
 			count = 0;
-			shape = new int[5];
+			shape = new int[6];
 			for (int i = x; i <= limitBottom; i++) {
 				if (state.getBoard()[i][y] == piece) {
 					shape[count] = 2;
@@ -360,7 +377,7 @@ public class Game extends GraphImpl {
 
 			shapeValue = calculateShape(shape);
 
-			if (piece != cpuPlayerPiece) {
+			if (piece != player.getPiece()) {
 				shapeValue *= -1;
 			}
 
@@ -368,7 +385,7 @@ public class Game extends GraphImpl {
 
 			// Left
 			count = 0;
-			shape = new int[5];
+			shape = new int[6];
 			for (int i = y; i >= limitLeft; i--) {
 				if (state.getBoard()[x][i] == piece) {
 					shape[count] = 2;
@@ -382,7 +399,7 @@ public class Game extends GraphImpl {
 
 			shapeValue = calculateShape(shape);
 
-			if (piece != cpuPlayerPiece) {
+			if (piece != player.getPiece()) {
 				shapeValue *= -1;
 			}
 
@@ -390,7 +407,7 @@ public class Game extends GraphImpl {
 
 			// Right
 			count = 0;
-			shape = new int[5];
+			shape = new int[6];
 			for (int i = y; i <= limitRight; i++) {
 				if (state.getBoard()[x][i] == piece) {
 					shape[count] = 2;
@@ -404,7 +421,7 @@ public class Game extends GraphImpl {
 
 			shapeValue = calculateShape(shape);
 
-			if (piece != cpuPlayerPiece) {
+			if (piece != player.getPiece()) {
 				shapeValue *= -1;
 			}
 
@@ -412,11 +429,11 @@ public class Game extends GraphImpl {
 
 			// Top-Right
 			count = 0;
-			shape = new int[5];
+			shape = new int[6];
 			for (int i = 0; i <= limitTR; i++) {
-				if (state.getBoard()[Math.min(x + i, 14)][Math.min(y + i, 14)] == piece) {
+				if (state.getBoard()[Math.max(x - i, 14)][Math.min(y + i, 14)] == piece) {
 					shape[count] = 2;
-				} else if (state.getBoard()[Math.min(x + i, 14)][Math.min(y + i, 14)] == NONE) {
+				} else if (state.getBoard()[Math.max(x - i, 14)][Math.min(y + i, 14)] == NONE) {
 					shape[count] = 1;
 				} else {
 					shape[count] = -1;
@@ -426,7 +443,7 @@ public class Game extends GraphImpl {
 
 			shapeValue = calculateShape(shape);
 
-			if (piece != cpuPlayerPiece) {
+			if (piece != player.getPiece()) {
 				shapeValue *= -1;
 			}
 
@@ -434,11 +451,11 @@ public class Game extends GraphImpl {
 
 			// Bottom-Right
 			count = 0;
-			shape = new int[5];
+			shape = new int[6];
 			for (int i = 0; i <= limitBR; i++) {
-				if (state.getBoard()[Math.max(x - i, 0)][Math.min(y + i, 14)] == piece) {
+				if (state.getBoard()[Math.min(x + i, 14)][Math.min(y + i, 14)] == piece) {
 					shape[count] = 2;
-				} else if (state.getBoard()[Math.max(x - i, 0)][Math.min(y + i, 14)] == NONE) {
+				} else if (state.getBoard()[Math.min(x + i, 0)][Math.min(y + i, 14)] == NONE) {
 					shape[count] = 1;
 				} else {
 					shape[count] = -1;
@@ -448,7 +465,7 @@ public class Game extends GraphImpl {
 
 			shapeValue = calculateShape(shape);
 
-			if (piece != cpuPlayerPiece) {
+			if (piece != player.getPiece()) {
 				shapeValue *= -1;
 			}
 
@@ -456,7 +473,7 @@ public class Game extends GraphImpl {
 
 			// Bottom-Left
 			count = 0;
-			shape = new int[5];
+			shape = new int[6];
 			for (int i = 0; i <= limitBL; i++) {
 				if (state.getBoard()[Math.min(x + i, 14)][Math.max(y - i, 0)] == piece) {
 					shape[count] = 2;
@@ -470,7 +487,7 @@ public class Game extends GraphImpl {
 
 			shapeValue = calculateShape(shape);
 
-			if (piece != cpuPlayerPiece) {
+			if (piece != player.getPiece()) {
 				shapeValue *= -1;
 			}
 
@@ -478,7 +495,7 @@ public class Game extends GraphImpl {
 
 			// Top-Left
 			count = 0;
-			shape = new int[5];
+			shape = new int[6];
 			for (int i = 0; i <= limitTL; i++) {
 				if (state.getBoard()[Math.max(x - i, 0)][Math.max(y - i, 0)] == piece) {
 					shape[count] = 2;
@@ -492,7 +509,7 @@ public class Game extends GraphImpl {
 
 			shapeValue = calculateShape(shape);
 
-			if (piece != cpuPlayerPiece) {
+			if (piece != player.getPiece()) {
 				shapeValue *= -1;
 			}
 
@@ -502,19 +519,17 @@ public class Game extends GraphImpl {
 		state.setValue(value);
 	}
 
-	private int calculateShape(int[] shape) {
-		int emptySpaces = 0, sequence = 0, enemy = 0;
-		boolean blankChars = false;
+	private long calculateShape(int[] shape) {
+		int emptySpaces = 0, sequence = 0, total = 0, lastValue = 0;
 		for (int value : shape) {
+			lastValue = value;
 			if (value == 1) {
 				emptySpaces++;
-			} else if (value == -1) {
-				enemy++;
 			} else if (value == 2) {
-				sequence++;
-			} else {
-				blankChars = true;
-				break;
+				total++;
+				if (lastValue == value) {
+					sequence++;
+				}
 			}
 		}
 
@@ -524,22 +539,29 @@ public class Game extends GraphImpl {
 		}
 
 		// Four
-		if (emptySpaces == 1 && enemy == 0 && !blankChars) {
+		if (total == 4) {
 			// Straight four
-			if (shape[0] == 1 || shape[4] == 1) {
+			if (shape[0] == 1 && shape[5] == 1) {
 				return STRAIGHT_FOUR;
 			}
 			return FOUR;
 		}
 
 		// Three
-		if (sequence == 3) {
+		if (sequence == 3 && total == 3) {
+			if((shape[0] == 1 || shape[1] == 1) && (shape[4] == 1 || shape[5] == 1)) {
+				return STRAIGHT_THREE;
+			}
 			return THREE;
 		}
 
 		// Broken Three
-		if (emptySpaces >= 1 && enemy <= 1 && emptySpaces <= 2) {
+		if (total == 3 && emptySpaces >= 1) {
 			return BROKEN_THREE;
+		}
+
+		if (sequence == 2 && total == 2) {
+			return TWO;
 		}
 
 		return 0;

@@ -87,7 +87,6 @@ class GomokuPanel extends JPanel {
 			int row = (int) Math.round((e.getY() - yTop) / squareWidth - 0.5);
 			if (row >= 0 && row < size && col >= 0 && col < size && state.getPiece(row, col) == GomokuState.NONE) {
 				state.playPiece(row, col);
-				System.out.println(state);
 				repaint();
 				int winner = state.getWinner();
 				if (winner != GomokuState.NONE)

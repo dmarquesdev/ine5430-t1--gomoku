@@ -69,6 +69,26 @@ public class Node {
 	public void addEdge(Edge edge) {
 		edges.add(edge);
 	}
+	
+	public boolean containsEdgeTo(Node node) {
+		for (Edge edge : edges) {
+			if(edge.getNode().equals(node)) {
+				return true;
+			}
+		}
+		
+		return false;
+	}
+	
+	public Node containsEdgeWithValue(Object value) {
+		for(Edge edge : edges) {
+			if(edge.getValue().equals(value)) {
+				return edge.getNode();
+			}
+		}
+		
+		return null;
+	}
 
 	@Override
 	public int hashCode() {

@@ -8,6 +8,7 @@ import br.ufsc.inf.ine5430.game.Player;
 public class GomokuState {
 	private Game game;
 	private Player currentPlayer;
+	private Player winner;
 
 	public static final int NONE = Game.NONE;
 	public static final int BLACK = Game.BLACK;
@@ -25,7 +26,10 @@ public class GomokuState {
 	}
 
 	public int getWinner() {
-		Player winner = game.getWinner();
+		if(winner == null) {
+			winner = game.getWinner();
+		}
+		
 		if (winner != null) {
 			return winner.getPieceType();
 		} else {
@@ -40,7 +44,12 @@ public class GomokuState {
 
 		Play play = new Play(currentPlayer, row, col);
 		game.makeAPlay(play);
+		
 		currentPlayer = game.getNextPlayer();
+		
+		if(getWinner() != NONE) {
+			return true;
+		}
 		
 		if(currentPlayer instanceof CPU) {
 			game.makeAPlay(((CPU) currentPlayer).createAPlay(game));
