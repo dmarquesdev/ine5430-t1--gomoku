@@ -18,10 +18,13 @@ public class CPU extends Player {
 		}
 	}
 
-	public CPU(int id, String name, int pieceType) {
-		super(id, name, pieceType);
+	public CPU(String name, int pieceType) {
+		super(name, pieceType);
 	}
 
+	/**
+	 * Get a play using minimax
+	 */
 	public Play createAPlay(Game game) {
 		long[] minimaxResult = minimax(game, 2, PlayerType.CPU, Long.MIN_VALUE, Long.MAX_VALUE);
 		Play bestPlay = new Play(this, (int) minimaxResult[1], (int) minimaxResult[2]);
@@ -29,6 +32,9 @@ public class CPU extends Player {
 		return bestPlay;
 	}
 
+	/**
+	 * Minimax implementation based on moodle example 
+	 */
 	private long[] minimax(Game game, int depth, PlayerType player, long alfa, long beta) {
 		game.generateMoves(player);
 

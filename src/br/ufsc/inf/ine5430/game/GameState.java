@@ -44,6 +44,9 @@ public class GameState extends Node {
 		return cloneBoard(getBoard());
 	}
 
+	/**
+	 * Get a copy of the board
+	 */
 	public static int[][] cloneBoard(int[][] board) {
 		int[][] clone = new int[board.length][board[0].length];
 		for (int i = 0; i < clone.length; i++) {

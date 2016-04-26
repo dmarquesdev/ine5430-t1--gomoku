@@ -5,7 +5,6 @@ import java.util.HashMap;
 import br.ufsc.inf.ine5430.game.CPU.PlayerType;
 import br.ufsc.inf.ine5430.graph.Edge;
 import br.ufsc.inf.ine5430.graph.GraphImpl;
-import br.ufsc.inf.ine5430.graph.Node;
 
 public class Game extends GraphImpl {
 	private Player player1;
@@ -15,15 +14,19 @@ public class Game extends GraphImpl {
 
 	private GameState currentState;
 
+	// Move Generation helpers
 	private int[] frame;
 	private HashMap<int[], Integer> playedPlaces;
+
 	private CPU cpuPlayer;
 	private Player humanPlayer;
 
+	// Piece Values
 	public static final int NONE = 0;
 	public static final int BLACK = 1;
 	public static final int WHITE = 2;
-	
+
+	// Heuristics Values
 	public static final int TWO = 1;
 	public static final int BROKEN_THREE = 10;
 	public static final int THREE = 1000;
@@ -97,6 +100,7 @@ public class Game extends GraphImpl {
 		// Add the new state (node) to the game (graph)
 		addNode(newState);
 
+		// Create an edge from currentState to the new state
 		Edge edge = new Edge(play, newState);
 		currentState.addEdge(edge);
 		addEdge(currentState, edge);
@@ -117,6 +121,9 @@ public class Game extends GraphImpl {
 		playedPlaces.put(new int[] { play.getX(), play.getY() }, play.getPlayer().getPieceType());
 	}
 
+	/**
+	 * Update the move generation frame, for handling intersection
+	 */
 	private void updateFrame(Play play) {
 		if (turn == 2 && !(lastPlay.getPlayer() instanceof CPU)) {
 			frame[0] = Math.max(0, Math.min(play.getX(), play.getY()) - 2);
@@ -128,6 +135,9 @@ public class Game extends GraphImpl {
 		}
 	}
 
+	/**
+	 * Gets the winner. In case there is no winner, returns null
+	 */
 	public Player getWinner() {
 		if (isAWin(currentState, lastPlay)) {
 			return lastPlay.getPlayer();
@@ -136,14 +146,18 @@ public class Game extends GraphImpl {
 		}
 	}
 
+	/**
+	 * Check for win in the state with specific play
+	 */
 	public boolean isAWin(GameState state, Play play) {
 		return (play != null && state != null) && (verticalCheckWin(state.getBoard(), play)
 				|| horizontalCheckWin(state.getBoard(), play) || diagonalsCheckWin(state.getBoard(), play));
 	}
 
+	/**
+	 * Transpose the board (exchange rows and columns) and test for Vertical Win
+	 */
 	private boolean horizontalCheckWin(int[][] board, Play play) {
-		// Transpose the board (exchange rows and columns) and test for Vertical
-		// Win
 		int[][] transposedBoard = new int[board.length][board[0].length];
 
 		for (int i = 0; i < board.length; i++) {
@@ -156,6 +170,10 @@ public class Game extends GraphImpl {
 		return verticalCheckWin(transposedBoard, transposedPlay);
 	}
 
+	/**
+	 * Align the board (compensate distance from play point) and test for
+	 * Vertical Win
+	 */
 	private boolean diagonalsCheckWin(int[][] board, Play play) {
 		boolean win = false;
 
@@ -219,6 +237,10 @@ public class Game extends GraphImpl {
 		return false;
 	}
 
+	/**
+	 * Check the top and the bottom of a play in the board for 5 consecutive
+	 * pieces of the same color
+	 */
 	private boolean verticalCheckWin(int[][] board, Play play) {
 		int pieceCount = 1;
 
@@ -257,16 +279,16 @@ public class Game extends GraphImpl {
 		return false;
 	}
 
-	@Override
-	public boolean isLeafNode(Node node) {
-		// TODO calculate next nodes
-		return super.isLeafNode(node);
-	}
-
+	/**
+	 * Get Piece color from row and column
+	 */
 	public int getPiece(int row, int column) {
 		return currentState.getBoard()[row][column];
 	}
 
+	/**
+	 * Swap between players using the current player
+	 */
 	public Player getNextPlayer() {
 		return (currentState.getPlayer().equals(player1)) ? player2 : player1;
 	}
@@ -285,8 +307,7 @@ public class Game extends GraphImpl {
 	}
 
 	/**
-	 * Evaluate the next moves based on the last play using a radius of 5
-	 * places, looking for empty places
+	 * Evaluate the next game states and create some nodes of the game graph
 	 */
 	public void generateMoves(PlayerType player) {
 
@@ -312,6 +333,9 @@ public class Game extends GraphImpl {
 		}
 	}
 
+	/**
+	 * Calculate the heuristics value from a state using a player type
+	 */
 	public void calculateValue(GameState state, PlayerType player) {
 		int value = 0;
 
@@ -519,6 +543,9 @@ public class Game extends GraphImpl {
 		state.setValue(value);
 	}
 
+	/**
+	 * Decide the value of a shape of 6 places
+	 */
 	private long calculateShape(int[] shape) {
 		int emptySpaces = 0, sequence = 0, total = 0, lastValue = 0;
 		for (int value : shape) {
@@ -549,7 +576,7 @@ public class Game extends GraphImpl {
 
 		// Three
 		if (sequence == 3 && total == 3) {
-			if((shape[0] == 1 || shape[1] == 1) && (shape[4] == 1 || shape[5] == 1)) {
+			if ((shape[0] == 1 || shape[1] == 1) && (shape[4] == 1 || shape[5] == 1)) {
 				return STRAIGHT_THREE;
 			}
 			return THREE;

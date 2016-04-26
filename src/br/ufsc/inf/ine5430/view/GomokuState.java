@@ -5,6 +5,10 @@ import br.ufsc.inf.ine5430.game.Game;
 import br.ufsc.inf.ine5430.game.Play;
 import br.ufsc.inf.ine5430.game.Player;
 
+/**
+ * Interface to the GUI, wrapping solution modeling
+ *
+ */
 public class GomokuState {
 	private Game game;
 	private Player currentPlayer;
@@ -15,8 +19,10 @@ public class GomokuState {
 	public static final int WHITE = Game.WHITE;
 
 	public GomokuState(int size) {
-//		Player p1 = new Player(1, "Human 1", Game.BLACK), p2 = new Player(2, "Human 2", Game.WHITE);
-		Player p1 = new Player(1, "Human", Game.BLACK), p2 = new CPU(2, "CPU", Game.WHITE);
+		// For Human x Human version		
+		// Player p1 = new Player("Human 1", Game.BLACK), p2 = new Player("Human 2", Game.WHITE);
+		
+		Player p1 = new Player("Human", Game.BLACK), p2 = new CPU("CPU", Game.WHITE);
 		game = new Game(p1, p2);
 		currentPlayer = p1;
 	}
