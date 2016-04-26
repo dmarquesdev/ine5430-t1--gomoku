@@ -26,6 +26,7 @@ public class CPU extends Player {
 		int bestColumn = -1;
 
 		if (possibleMoves.isEmpty() || depth == 0) {
+			game.calculateValue(game.getCurrentState());
 			score = game.getCurrentState().getValue();
 			return new int[] { score, bestRow, bestColumn };
 		} else {
@@ -43,7 +44,7 @@ public class CPU extends Player {
 						bestColumn = play.getY();
 					}
 				} else {
-					score = minimax(game, depth - 1, player, alfa, beta)[0];
+					score = minimax(game, depth - 1, getNextPlayer(player), alfa, beta)[0];
 					if (score < beta) {
 						beta = score;
 						bestRow = play.getX();
@@ -53,6 +54,7 @@ public class CPU extends Player {
 				game.setCurrentState(currentState);
 				game.setTurn(turn);
 				game.setLastPlay(lastPlay);
+				game.getPlayedPlaces().remove(new int[]{play.getX(), play.getY()});
 				if (alfa >= beta)
 					break;
 			}

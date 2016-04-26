@@ -14,7 +14,8 @@ public class GomokuState {
 	public static final int WHITE = Game.WHITE;
 
 	public GomokuState(int size) {
-		Player p1 = new Player(1, "Human 1", Game.BLACK), p2 = new Player(2, "Human 2", Game.WHITE);
+//		Player p1 = new Player(1, "Human 1", Game.BLACK), p2 = new Player(2, "Human 2", Game.WHITE);
+		Player p1 = new Player(1, "Human", Game.BLACK), p2 = new CPU(2, "CPU", Game.WHITE);
 		game = new Game(p1, p2);
 		currentPlayer = p1;
 	}

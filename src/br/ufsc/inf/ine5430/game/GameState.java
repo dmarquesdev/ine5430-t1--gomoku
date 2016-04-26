@@ -33,25 +33,25 @@ public class GameState extends Node {
 	}
 
 	public int getValue() {
-		if (value == null) {
-			// TODO choose between heuristics and utility and calculate
-			value = 0;
-		}
 		return value;
+	}
+
+	public void setValue(Integer value) {
+		this.value = value;
 	}
 
 	public int[][] cloneBoard() {
 		return cloneBoard(getBoard());
 	}
-	
+
 	public static int[][] cloneBoard(int[][] board) {
 		int[][] clone = new int[board.length][board[0].length];
-		for(int i = 0; i < clone.length; i++) {
-			for(int j = 0; j < clone[0].length; j++) {
+		for (int i = 0; i < clone.length; i++) {
+			for (int j = 0; j < clone[0].length; j++) {
 				clone[i][j] = board[i][j];
 			}
 		}
-		
+
 		return clone;
 	}
 
